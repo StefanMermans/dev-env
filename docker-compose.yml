@@ -1,0 +1,61 @@
+name: dev-env
+
+volumes:
+  redis-data:
+  mariadb-data:
+  mailhog-data:
+  postgres-data:
+
+services:
+  redis-stack:
+    image: redis/redis-stack
+    ports:
+      - '6379:6379'
+      - '8055:8001'
+    volumes:
+      - ./config/redis/redis.conf:/redis-stack.conf
+      - redis-data:/data
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog
+    user: root
+    restart: unless-stopped
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    volumes:
+      - mailhog-data:/home/mailhog/user-maildir
+    environment:
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/home/mailhog/user-maildir
+  
+  postgres:
+    image: postgres:17.2
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  sqlsrv:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      SA_PASSWORD: 'P@ssw0rd123'
+    ports:
+      - 1433:1433
+    volumes:
+      - ./data/sqlsrv:/var/opt/mssql
+  mariadb:
+    image: mariadb:10.6.22-jammy
+    restart: unless-stopped
+    ports:
+      - '3306:3306'
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+
