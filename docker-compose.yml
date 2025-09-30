@@ -3,8 +3,8 @@ name: dev-env
 volumes:
   redis-data:
   mariadb-data:
-  mailhog-data:
   postgres-data:
+  mailpit-data:
 
 services:
   redis-stack:
@@ -17,18 +17,19 @@ services:
       - redis-data:/data
     restart: unless-stopped
 
-  mailhog:
-    image: mailhog/mailhog
-    user: root
+  mailpit:
+    image: axllent/mailpit
     restart: unless-stopped
     ports:
-      - '1025:1025'
       - '8025:8025'
+      - '1025:1025'
     volumes:
-      - mailhog-data:/home/mailhog/user-maildir
+      - mailpit-data:/data
     environment:
-      - MH_STORAGE=maildir
-      - MH_MAILDIR_PATH=/home/mailhog/user-maildir
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
   
   postgres:
     image: postgres:17.2
